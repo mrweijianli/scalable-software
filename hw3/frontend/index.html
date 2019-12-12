@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<!-- for reference, see:
+  -- https://dev.to/luispa/lets-try-react-without-nodejs-3a7
+  -- https://reactjs.org/docs/hello-world.html
+  -->
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>React Local</title>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+  <script src="https://unpkg.com/react@latest/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@latest/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/babel-standalone@latest/babel.min.js" crossorigin="anonymous"></script>
+  <!-- Fonts to support Material Design -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <!-- Icons to support Material Design -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
+  <!-- your custom CSS goes here: -->
+  <style>
+    em{font-weight: bolder}
+  </style>
+
+  <!-- Maybe you want to use bootstrap to make it pretty? -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <script type="text/babel">
+  const {
+    colors,
+    CssBaseline,
+    ThemeProvider,
+    Typography,
+    Container,
+    makeStyles,
+    withStyles,
+    TextField,
+    Button,
+    MenuItem,
+    createMuiTheme,
+    Divider,
+    Box,
+    SvgIcon,
+    Link,
+    Paper,
+    Switch,
+    Card,
+    CardActions,
+    CardContent
+  } = MaterialUI;
+
+  // Obtain the root
+  const rootElement = document.getElementById('root')
+
+  const useStyles = makeStyles(theme => ({
+      container: {
+        display: 'flex',
+        flexWrap: 'wrap',
+      },
+      textField: {
+        marginLeft: theme.spacing(2),
+        marginRight: theme.spacing(2),
+      },
+      dense: {
+        marginTop: theme.spacing(2),
+      },
+      menu: {
+        width: 150,
+      },
+      button: {
+        margin: theme.spacing(1),
+      },
+      input: {
+        display: 'none',
+      },
+      card: {
+        minWidth: 275,
+      },
+      bullet: {
+        display: 'inline-block',
+        margin: '0 2px',
+        transform: 'scale(0.8)',
+      },
+      title: {
+        fontSize: 14,
+      },
+      pos: {
+        marginBottom: 12,
+      }
+    }));
+
+    const BootstrapButton = withStyles({
+      root: {
+        boxShadow: 'none',
+        textTransform: 'none',
+        fontSize: 16,
+        padding: '12px 12px',
+        border: '1px solid',
+        lineHeight: 0.5,
+        backgroundColor: '#F43D5D',
+        borderColor: '#F43D5D',
+        fontFamily: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          'sans-serif',
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
+        ].join(','),
+        '&:hover': {
+          backgroundColor: '#FF8398',
+          borderColor: '#FF8398',
+          boxShadow: 'none',
+        },
+        '&:active': {
+          boxShadow: 'none',
+          backgroundColor: '#F43D5D',
+          borderColor: '#F43D5D',
+        },
+        '&:focus': {
+          boxShadow: '0 0 0 0.2rem rgba(0,123,255,.5)',
+        },
+      },
+    })(Button);
+
+    const OutlinedTextFields = ({state, setState, switchState, dateState, setSearchResult}) => {
+      const classes = useStyles();
+
+      const handleSearchTextChange = name => e => {
+        setState({ ...state, [name]: e.target.value})
+      }
+      const handleSearchButton = (searchState, switchState, dateState, setSearchResult) => {
+          setState({ ...state, ["result"]: 1})
+          setState({ ...state, ["query"]: searchState.searchText})
+          let fetchResult = fetch("http://ssa-hw2-backend.stevetarzia.com/api/search?query="+searchState.searchText)
+          if (switchState.language_checked){
+            if (switchState.date_checked && isCorrectDate(dateState.date)){
+              fetchResult = fetch("http://ssa-hw2-backend.stevetarzia.com/api/search?query="+searchState.searchText+"&language=en"+"&date="+dateState.date)
+            }
+            else{
+              fetchResult = fetch("http://ssa-hw2-backend.stevetarzia.com/api/search?query="+searchState.searchText+"&language=en")
+            }
+          }
+          fetchResult
+            .then(response => response.json())
+            .then(json => {
+              setSearchResult(json)
+            })
+            .catch(() => {
+            })
+      }
+
+      const isCorrectDate = (date) => {
+        if (date != ""){
+          return true
+        }
+        else{
+          return false
+        }
+      }
+
+      return (
+      <span key="searchBox">
+        <Typography variant="h3" 
+                    component="h3" 
+                    align="center" 
+                    color="secondary"
+                    fontStyle="oblique"
+                    letterSpacing={6} m={1}>
+          GOGGLE
+        </Typography>
+        <br/>
+        <form className={classes.container} noValidate autoComplete="off" key="searchBox">
+          <TextField
+          id="outlined-full-width"
+          style={{ margin: 3 }}
+          placeholder="input search..."
+          fullWidth
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          variant="outlined"
+          value={state.searchText} 
+          onChange={handleSearchTextChange('searchText')}
+        />
+        </form>
+          <BootstrapButton variant="contained" 
+                           size="small" 
+                           color="secondary" 
+                           disableRipple 
+                           className={classes.margin} 
+                           onClick={() => handleSearchButton(state, switchState, dateState, setSearchResult)}>
+            Search
+          </BootstrapButton>
+          <br/><br/>
+      </span>
+      );
+    }
+
+    const DisplayResult = ({state, searchResult, setSearchResult, switchState, dateValue, pageState, setpageState}) => {
+      const classes = useStyles();
+      const bull = <span className={classes.bullet}>•</span>;
+      if (typeof searchResult['articles'] == 'undefined') {
+        return null
+      }
+      if (typeof switchState == 'undefined') {
+        return null
+      }
+      const arr = searchResult['articles']
+
+      const createBoldHelper = (str, keyword) => {
+        const keywords = keyword.split(" ")
+        if (keywords.length == 1){
+          return {__html: str.replace(RegExp(keyword, 'ig'), function(word){return "<strong>"+word+"</strong>"})}
+        }
+        else{
+          keywords.map(key => str = str.replace(new RegExp(key, 'ig'), function(word){return "<strong>"+word+"</strong>"}))
+          return {__html: str}
+        }
+      }
+
+      const createBold = (str, keyword) => {
+        return {__html: str.replace(pattern, function(word){return "<strong>"+word+"</strong>"})}
+      }
+      const displayResultHighlight = (result, keyword) => {
+        return <div dangerouslySetInnerHTML={createBoldHelper(result, keyword)} />
+      }
+
+      const hasPrevious = (pageState) => {
+        if(pageState.page <= 0){
+          return false
+        }
+        return true
+      };
+
+      const handleNextPageButton = (searchState, switchState, dateState, setpageState, pageState, setSearchResult) => {
+        const offsetState = pageState.page + 1
+        let fetchResult = fetch("http://ssa-hw2-backend.stevetarzia.com/api/search?query="+searchState.query+"&offset="+offsetState*10)
+        if (switchState.language_checked){
+          if (switchState.date_checked && isCorrectDate(dateState.date)){
+            fetchResult = fetch("http://ssa-hw2-backend.stevetarzia.com/api/search?query="+searchState.query+"&language=en"+"&date="+dateState.date+"&offset="+offsetState*10)
+          }
+          else{
+            fetchResult = fetch("http://ssa-hw2-backend.stevetarzia.com/api/search?query="+searchState.query+"&language=en"+"&offset="+offsetState*10)
+          }
+        }
+        fetchResult
+          .then(response => response.json())
+          .then(json => {
+            setSearchResult(json)
+            setpageState({page: offsetState})
+          })
+          .catch(() => {
+          })
+
+      }
+
+    const handlePreviousPageButton = (searchState, switchState, dateState, setpageState, pageState) => {
+      const offsetState = pageState.page - 1
+      if (pageState.page >= 0){
+        let fetchResult = fetch("http://ssa-hw2-backend.stevetarzia.com/api/search?query="+searchState.query+"&offset="+offsetState*10)
+        if (switchState.language_checked){
+          if (switchState.date_checked && isCorrectDate(dateState.date)){
+            fetchResult = fetch("http://ssa-hw2-backend.stevetarzia.com/api/search?query="+searchState.query+"&language=en"+"&date="+dateState.date+"&offset="+offsetState*10)
+          }
+          else{
+            fetchResult = fetch("http://ssa-hw2-backend.stevetarzia.com/api/search?query="+searchState.query+"&language=en"+"&offset="+offsetState*10)
+          }
+        }
+        fetchResult
+          .then(response => response.json())
+          .then(json => {
+            setSearchResult(json)
+            setpageState({page: offsetState})
+          })
+          .catch(() => {
+          })
+      }
+    }
+
+    const routeChange = (url) => {
+      this.props.history.push(url);
+    }
+
+    const fetchKeywordSnippet = (keyword, text) => {
+      var textSnippet = []
+      const keywords = keyword.split(" ")
+      const txtIndex = text.search(new RegExp(keyword, 'ig'))
+      if (txtIndex > -1){
+        textSnippet.push(text.substring(txtIndex, txtIndex+500))
+        return textSnippet
+      }
+      if (keywords.length == 1) {
+        textSnippet.push(text.substring(txtIndex, txtIndex+500))
+      }
+      else {
+        keywords.map(key => textSnippet.push(text.substring(text.search(new RegExp(key, 'ig')), text.search(new RegExp(key, 'ig'))+500)))
+      }
+      return textSnippet
+    }
+      return (
+        <div>
+          <Typography className={classes.pos} color="textSecondary">
+            {searchResult.total_results} results found
+          </Typography>
+          {arr.map(resultItem =>
+            <Card className={classes.card} key={arr.indexOf(resultItem)}>
+              <CardContent>
+                <Typography className={classes.pos} variant="h5" color="textPrimary">
+                  {resultItem.title}
+                </Typography>
+                <Typography className={classes.pos} color="textSecondary">
+                  {resultItem.url}
+                </Typography>
+                <Typography variant="body2" component="div">
+                  {fetchKeywordSnippet(state.query, resultItem.txt).map(snippet=> displayResultHighlight(snippet, state.query))}...
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <a href={resultItem.url}>Learn More</a>
+              </CardActions>
+            </Card>
+          )}
+          <br/><br/>
+          <CardActions style={{justifyContent: 'center'}}>
+            <Button 
+              variant="outlined" 
+              size="medium" 
+              color="secondary"
+              align="center"
+              disabled={!hasPrevious(pageState)}
+              href="#top"
+              onClick={() => handlePreviousPageButton(state, switchState, dateValue, setpageState, pageState, setSearchResult)} >
+            Previous
+            </Button>
+            <Button 
+              variant="outlined" 
+              size="medium" 
+              color="secondary"
+              href="#top"
+              onClick={() => handleNextPageButton(state, switchState, dateValue, setpageState, pageState, setSearchResult)} >
+            Next
+            </Button>
+          </CardActions>
+        </div>
+      );
+    }
+
+  const SearchEngine = () => {
+    const classes = useStyles();
+    const [state, setState] = React.useState({"searchText": ""})
+    const [searchResult, setSearchResult] = React.useState({})
+    const [currentSearchQuery, setCurrentSearchQuery] = React.useState({'query':''})
+
+    //language switch
+    const [switchState, setSwitchState] = React.useState({
+      language_checked: true,
+      date_checked: false,
+    });
+    const handleSwitchChange = name => event => {
+      setSwitchState({ ...switchState, [name]: event.target.checked });
+    };
+    ///
+
+    //date picker
+    const [dateValue, setDateValue] = React.useState({
+      date: '2019-10-02',
+      multiline: 'Controlled',
+    });
+
+    const handleDateChange = name => event => {
+      setDateValue({ ...dateValue, [name]: event.target.value });
+    };
+    const dateDisable = !switchState.date_checked;
+    ///
+
+    //page control
+    const [pageState, setpageState] = React.useState({
+        page: 0,
+      });
+    return (
+        <div key="languageControl" style={{'marginLeft': '20px', 'marginRight': '20px'}}>
+          <div style={{'marginTop': '100px', 'marginLeft': '20%', 'marginRight': '20%' }}>
+            <OutlinedTextFields state={state} 
+                                setState={setState} 
+                                switchState={switchState} 
+                                dateState={dateValue} 
+                                setSearchResult={setSearchResult}/>
+            <br/><br/>
+            <Divider variant="middle" />
+            <Typography variant="body1" component="h3" color="secondary">
+              Advanced settings
+            </Typography>
+            English only
+            <Switch
+              checked={switchState.language_checked}
+              onChange={handleSwitchChange('language_checked')}
+              value="language_checked"
+              color="secondary"
+              inputProps={{ 'aria-label': 'primary checkbox' }}
+            />
+            Search date
+            <Switch
+              checked={switchState.date_checked}
+              onChange={handleSwitchChange('date_checked')}
+              value="date_checked"
+              color="secondary"
+              inputProps={{ 'aria-label': 'primary checkbox' }}
+            />
+            <TextField
+              disabled={dateDisable}
+              id="standard-name"
+              label="Date (YYYY-MM-DD)"
+              margin="normal"
+              inputProps={{ 'aria-label': 'bare' }}
+              value={dateValue.date}
+              onChange={handleDateChange('date')}
+              margin="normal"
+            />
+          </div>
+          <DisplayResult key="searchBox" 
+                         state={state} 
+                         searchResult={searchResult} 
+                         setSearchResult={setSearchResult}
+                         switchState={switchState} 
+                         dateValue={dateValue} 
+                         pageState={pageState}
+                         setpageState={setpageState}/>
+        </div>
+    );
+  }
+
+  // Use the ReactDOM.render to show your component on the browser
+  ReactDOM.render(
+    <SearchEngine />,
+    rootElement
+  )
+  </script>
+
+</body>
+
+</html>

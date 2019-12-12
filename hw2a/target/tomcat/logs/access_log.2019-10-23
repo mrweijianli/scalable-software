@@ -1,0 +1,15 @@
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:04 -0500] "GET /api/search HTTP/1.1" 400 - http-bio-8080-exec-1 586
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:04 -0500] "GET /api/search?count=5 HTTP/1.1" 400 - http-bio-8080-exec-2 5
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:04 -0500] "GET /api/search?date=2019-10-18 HTTP/1.1" 400 - http-bio-8080-exec-3 8
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:08 -0500] "GET /api/search?query=Donald%20Trump HTTP/1.1" 200 107774 http-bio-8080-exec-4 3903
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:10 -0500] "GET /api/search?query=Donald%20Trump&count=2 HTTP/1.1" 200 23907 http-bio-8080-exec-6 230
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:13 -0500] "GET /api/search?query=Donald%20Trump&count=2&offset=3 HTTP/1.1" 200 20645 http-bio-8080-exec-8 2223
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:14 -0500] "GET /api/search?query=Donald%20Trump&date=2019-10-17 HTTP/1.1" 200 84725 http-bio-8080-exec-10 528
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:16 -0500] "GET /api/search?query=Donald%20Trump&date=2019-10-17&count=5 HTTP/1.1" 200 51219 http-bio-8080-exec-2 1134
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:19 -0500] "GET /api/search?query=Donald%20Trump&date=2019-10-18&language=de HTTP/1.1" 200 97247 http-bio-8080-exec-4 1578
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:22 -0500] "GET /api/search?query=Donald%20Trump%20Nancy%20Pelosi%20Bernie%20Sanders HTTP/1.1" 200 51731 http-bio-8080-exec-6 1748
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:23 -0500] "GET /api/search?query=Donald%20Trump%20Nancy%20Pelosi%20Bernie%20Sanders&count=2 HTTP/1.1" 200 10238 http-bio-8080-exec-8 175
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:24 -0500] "GET /api/search?query=Donald%20Trump%20Nancy%20Pelosi%20Bernie%20Sanders&count=2&offset=3 HTTP/1.1" 200 9117 http-bio-8080-exec-10 171
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:25 -0500] "GET /api/search?query=Donald%20Trump%20Nancy%20Pelosi%20Bernie%20Sanders&date=2019-10-17 HTTP/1.1" 200 121746 http-bio-8080-exec-3 706
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:26 -0500] "GET /api/search?query=Donald%20Trump%20Nancy%20Pelosi%20Bernie%20Sanders&date=2019-10-17&count=5 HTTP/1.1" 200 47940 http-bio-8080-exec-4 418
+0:0:0:0:0:0:0:1 - - [23/Oct/2019:19:59:28 -0500] "GET /api/search?query=Donald%20Trump%20Nancy%20Pelosi%20Bernie%20Sanders&date=2019-10-18&language=es HTTP/1.1" 200 84 http-bio-8080-exec-7 718

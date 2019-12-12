@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<!-- for reference, see:
+  -- https://dev.to/luispa/lets-try-react-without-nodejs-3a7
+  -- https://reactjs.org/docs/hello-world.html
+  -->
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>React Local</title>
+    <script type="application/javascript" src="https://unpkg.com/react@16.0.0/umd/react.production.min.js"></script>
+    <script type="application/javascript" src="https://unpkg.com/react-dom@16.0.0/umd/react-dom.production.min.js"></script>
+    <script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+
+    <!-- your custom CSS goes here: -->
+    <style>
+        em{font-weight: bolder}
+    </style>
+
+    <!-- Maybe you want to use bootstrap to make it pretty? -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+</head>
+
+<body>
+<div id="root"></div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+    // Obtain the root
+    const rootElement = document.getElementById('root')
+
+    class InputBox extends React.Component {
+        constructor(props) {
+            super(props);
+            this.handleChange = this.handleChange.bind(this);
+        }
+
+        handleChange(e) {
+            this.props.handleInput(e.target.value);
+        }
+
+        render() {
+            const text = this.props.q;
+            return <input value={text} onChange={this.handleChange} placeholder="Search..."/>;
+        }
+    }
+
+    class InputLang extends React.Component {
+        constructor(props) {
+            super(props);
+            this.handleChange = this.handleChange.bind(this);
+        }
+
+        handleChange(e) {
+            this.props.handleSwitch(e.target.checked);
+        }
+
+        render() {
+            const ifOn = this.props.lang;
+            return (
+                <div className="form-check">
+                    <input className="form-check-input" type="checkbox" value="" checked={ifOn} onChange={this.handleChange} />
+                        <label className="form-check-label" htmlFor="defaultCheck1">
+                            Only English
+                        </label>
+                </div>
+            );
+        }
+    }
+
+    class InputDate extends React.Component {
+        constructor(props) {
+            super(props);
+            this.handleChange = this.handleChange.bind(this);
+        }
+
+        handleChange(e) {
+            this.props.handleDate(e.target.value);
+        }
+
+        render() {
+            const date = this.props.date;
+            return (
+                <div className="form-group row">
+                    <label className="col-form-label">Date</label>
+                    <div className="col-3">
+                        <input className="form-control" type="date" onChange={this.handleChange} value={date}/>
+                    </div>
+                </div>
+            );
+        }
+    }
+
+    class TurnPage extends React.Component {
+        constructor(props) {
+            super(props);
+            this.handleUp = this.handleUp.bind(this);
+            this.handleDown = this.handleDown.bind(this);
+        }
+
+        handleUp() {
+            this.props.handleTurnUp();
+        }
+
+        handleDown() {
+            this.props.handleTurnDown();
+        }
+
+        render() {
+            return (
+                <div>
+                    <button onClick={this.handleUp}>Page Up</button>
+                    <button onClick={this.handleDown}>Page Down</button>
+                </div>
+            );
+        }
+    }
+
+    class ShowResult extends React.Component {
+        generateHTML(res, query) {
+            const createHighLight = (str, query) => {
+                var queryWords = query.split(" ")
+                for (let index = 0; index < queryWords.length; index++) {
+                    var queryWordPattern = new RegExp(queryWords[index], 'ig')
+                    // str = str.replace(queryWordPattern, "<strong>"+queryWords[index]+"</strong>")
+                    str = str.replace(queryWordPattern, (matchWord) => {
+                        return "<mark><strong>"+matchWord+"</strong></mark>"
+                    })
+                }
+                // str = str.replace(pattern, "<strong>"+query+"</strong>")
+                return {__html: str.replace(" ... ", " ... <br/>")}
+            }
+            const getMeRelevantText = (text, query) => {
+                var queryRegex = new RegExp(query, 'ig')
+                var idx = text.search(queryRegex)
+                if (idx !== -1) {
+                    return text.substr(idx, 500)
+                }
+                else {
+                    var queryWords = query.split(" ")
+                    var result = ""
+                    var x = queryWords.length
+                    for (let i = 0; i < queryWords.length; i++) {
+                        var wordRegex = new RegExp(queryWords[i], 'ig')
+                        idx = text.search(wordRegex)
+                        if (idx === -1) {
+                            continue
+                        }
+                        result = result + text.substr(idx, parseInt(500/x)) + " ... "
+                    }
+                    return result
+                }
+            }
+            return (
+                <div className="card">
+                    <div className="card-body">
+                        <a href={res.url}>
+                            <h5 className="card-title"><span dangerouslySetInnerHTML={{__html: res.title}} /></h5>
+                        </a>
+                        <a href={res.url} style={{color: 'green'}}>
+                            <h6 className="card-subtitle">{res.url}</h6>
+                        </a>
+                        <p className="card-text">
+                            <span dangerouslySetInnerHTML={createHighLight(getMeRelevantText(res.txt, query),query)} />
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        render() {
+            const results = this.props.results;
+            const query = this.props.q;
+            return results.map((res) => this.generateHTML(res, query));
+        }
+    }
+    class SearchApp extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {query: "", results: [], onlyEng : false, date: "", offset: 0};
+            this.handleQuery = this.handleQuery.bind(this);
+            this.handleSwitch = this.handleSwitch.bind(this);
+            this.handleDate = this.handleDate.bind(this);
+            this.handleTurnDown = this.handleTurnDown.bind(this);
+            this.handleTurnUp = this.handleTurnUp.bind(this);
+        }
+
+        handleQuery(q) {
+            this.setState({query: q, offset: 0});
+            const onlyEng = this.state.onlyEng;
+            const date = this.state.date;
+            let query = "http://ssa-hw2-backend.stevetarzia.com/api/search?query=" + encodeURI(q);
+            if (onlyEng) {
+                query = query + "&&language=en";
+            }
+            if (date !== "") {
+                query = query + "&&date=" + date;
+            }
+            fetch(query)
+                .then(response => response.json()) /* asynchronously parse the response as JSON */
+                .then(json => this.setState({results: json.articles}) /* do something with the resulting "json" object */)
+                .catch(() => this.setState({results: []}) /* do something if either the HTTP call or the JSON parsing fails */);
+        }
+
+        handleSwitch(ifOn) {
+            this.setState({onlyEng: ifOn, offset: 0});
+            const q = this.state.query;
+            const date = this.state.date;
+            let query = "http://ssa-hw2-backend.stevetarzia.com/api/search?query=" + encodeURI(q);
+            if (ifOn) {
+                query = query + "&&language=en";
+            }
+            if (date !== "") {
+                query = query + "&&date=" + date;
+            }
+            fetch(query)
+                .then(response => response.json()) /* asynchronously parse the response as JSON */
+                .then(json => this.setState({results: json.articles}) /* do something with the resulting "json" object */)
+                .catch(() => this.setState({results: []}) /* do something if either the HTTP call or the JSON parsing fails */);
+        }
+
+        handleDate(date) {
+            this.setState({date: date, offset: 0});
+            const q = this.state.query;
+            const onlyEng = this.state.onlyEng;
+            let query = "http://ssa-hw2-backend.stevetarzia.com/api/search?query=" + encodeURI(q);
+            if (onlyEng) {
+                query = query + "&&language=en";
+            }
+            if (date !== "") {
+                query = query + "&&date=" + date;
+            }
+            fetch(query)
+                .then(response => response.json()) /* asynchronously parse the response as JSON */
+                .then(json => this.setState({results: json.articles}) /* do something with the resulting "json" object */)
+                .catch(() => this.setState({results: []}) /* do something if either the HTTP call or the JSON parsing fails */);
+        }
+
+        handleTurnUp() {
+            if (this.state.offset > 10) {
+                this.setState({offset: this.state.offset - 10});
+            }
+            const q = this.state.query;
+            const onlyEng = this.state.onlyEng;
+            const date = this.state.date;
+            const offset = this.state.offset - 10;
+            let query = "http://ssa-hw2-backend.stevetarzia.com/api/search?query=" + encodeURI(q);
+            if (onlyEng) {
+                query = query + "&&language=en";
+            }
+            if (date !== "") {
+                query = query + "&&date=" + date;
+            }
+            if (offset >= 0) {
+                query = query + "&&offset=" + offset;
+            }
+            fetch(query)
+                .then(response => response.json()) /* asynchronously parse the response as JSON */
+                .then(json => this.setState({results: json.articles}) /* do something with the resulting "json" object */)
+                .catch(() => this.setState({results: []}) /* do something if either the HTTP call or the JSON parsing fails */);
+        }
+
+        handleTurnDown() {
+            this.setState({offset: this.state.offset + 10});
+            const q = this.state.query;
+            const onlyEng = this.state.onlyEng;
+            const date = this.state.date;
+            const offset = this.state.offset + 10;
+            let query = "http://ssa-hw2-backend.stevetarzia.com/api/search?query=" + encodeURI(q);
+            if (onlyEng) {
+                query = query + "&&language=en";
+            }
+            if (date !== "") {
+                query = query + "&&date=" + date;
+            }
+            if (offset >= 0) {
+                query = query + "&&offset=" + offset;
+            }
+            fetch(query)
+                .then(response => response.json()) /* asynchronously parse the response as JSON */
+                .then(json => this.setState({results: json.articles}) /* do something with the resulting "json" object */)
+                .catch(() => this.setState({results: []}) /* do something if either the HTTP call or the JSON parsing fails */);
+        }
+
+        render() {
+            const query = this.state.query;
+            const results = this.state.results;
+            const onlyEng = this.state.onlyEng;
+            const date = this.state.date;
+            return (
+                <div>
+                    <div class="jumbotron jumbotron-fluid">
+                        <div className="container">
+
+                            <h4>This is a search engine for recent news</h4>
+                            <h5>Enter your keyword below:</h5>
+                            <InputBox q={query} handleInput={this.handleQuery}/>
+                            <InputLang lang={onlyEng} handleSwitch={this.handleSwitch}/>
+                            <InputDate date={date} handleDate={this.handleDate}/>
+                            <TurnPage handleTurnUp={this.handleTurnUp} handleTurnDown={this.handleTurnDown}/>
+                        </div>
+                        <div className="container">
+                            <ShowResult results={results} q={query}/>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    }
+    // Use the ReactDOM.render to show your component on the browser
+    ReactDOM.render(
+        <SearchApp />,
+        rootElement
+    )
+</script>
+
+</body>
+
+</html>
